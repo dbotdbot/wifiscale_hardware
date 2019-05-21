@@ -48,7 +48,28 @@ WiFiClient client = server.available();
 const int capacity = JSON_OBJECT_SIZE(3);            
 StaticJsonDocument<capacity> doc;                 //make our json doc which will hold the json to send
 
+void connectToWifi(){
+  noInterrupts();
+  lcd.setCursor(0, 1);
+  lcd.print("Connecting to Wifi now");
+
+  //Setup Wifi connection
+  Serial.println("Setting up Wifi now");
+  WiFi.begin(ssid, password);
+  while(WiFi.status() != WL_CONNECTED){
+    delay(100);
+    Serial.print ("/");
+  }
+  Serial.println("!");
+  Serial.println("Wifi is now connected!");
+  Serial.print("IP address is ");
+  Serial.print(WiFi.localIP());
+  Serial.println("");
+  interrupts();
+}
+
 void jsonPOST(){
+  noInterrupts();
   HTTPClient http;
 
   doc["timestamp"].set("09/05/2017 18:00:00");
@@ -73,6 +94,7 @@ void jsonPOST(){
   Serial.println(payload);    //Print request response payload
  
   http.end();  //Close connectio
+  interrupts();
 }
 
 //Interrupts for the buttons
