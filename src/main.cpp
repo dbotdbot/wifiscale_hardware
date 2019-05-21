@@ -50,37 +50,29 @@ StaticJsonDocument<capacity> doc;                 //make our json doc which will
 
 void jsonPOST(){
   HTTPClient http;
-  
+
   doc["timestamp"].set("09/05/2017 18:00:00");
   doc["weight"].set("10");
   doc["foodtype"].set("french");
 
-  serializeJson(doc, Serial);              //debug to see json
+  String jsonString;
+  serializeJson(doc, jsonString);              //debug to see json
 
+  Serial.println(jsonString);
 
   http.begin("http://192.168.0.151:8090/postjson");
 
   http.addHeader("Content-Type", "application/json");
-  
-  
-  //http.addHeader("Content-Type", "text/html");
-  int httpResponseCode = http.GET();
-  //Serial.println(http.GET().errorToString());
 
-  Serial.print("Http Response code is ");
-  Serial.println(httpResponseCode);
+  //serializeJsonPretty(doc, http);
 
-  if(httpResponseCode>0){
-    String response = http.getString(); //Get the response to the request
+  int httpCode = http.POST(jsonString);            //Send the request
+  String payload = http.getString();    //Get the response payload
  
-    Serial.println(httpResponseCode);   //Print return code
-    Serial.println(response);           //Print request answer
-  }
-
-  http.writeToStream(&Serial);
-  http.end();
-
-  delay(500);
+  Serial.println(httpCode);   //Print HTTP return code
+  Serial.println(payload);    //Print request response payload
+ 
+  http.end();  //Close connectio
 }
 
 //Interrupts for the buttons
@@ -105,8 +97,8 @@ void sendInterrupt(){
     Serial.println("Send Button pressed!!!!!!");
     //code to trigger a Http push request (or set a flag to do it) will go here
     sendJson = true;
-    jsonPOST();
-    Serial.println("send finished");
+    //jsonPOST();
+    //Serial.println("send finished");
   }
   last_interrupt_time = interrupt_time;
 }
@@ -250,106 +242,12 @@ void loop() {
   Serial.println(scale.get_units(5), 1);
   */
 
-  
-  
-  // Check if a client has connected
-  //WiFiClient client = server.available();
-  if (client) {
-  
- 
-    // Wait until the client sends some data
-    Serial.println("new client");
-    if(client.available()){
-      /*
-      if(sendJson == true){
-          Serial.println("Trying to send HTTP request");
-          HTTPClient http;
-  
-          //http.begin("http://localhost:8090/postjson");
-          http.begin(client, "http://localhost:8090/postjson");
-  
-          //http.addHeader("Content-Type", "application/json");
-          http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-          
-          int httpResponseCode = http.POST("{\"y\":6,\"x\":11}");
-          Serial.print("Http Response code is ");
-          Serial.println(httpResponseCode);
-
-          if(httpResponseCode>0){
-            String response = http.getString(); //Get the response to the request
- 
-            Serial.println(httpResponseCode);   //Print return code
-            Serial.println(response);           //Print request answer
-          }
-
-          http.writeToStream(&Serial);
-          http.end();
-          sendJson = false;
-          delay(500);
-      }
-      */
+  //check if need to send json
+  if (sendJson == true){
+    //code to connect to Wifi
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      delay(1);
-      Serial.println("Stuck waiting for the dam client!");
-      Serial.print("Client.available = ");
-      Serial.println(client.available());
-    
-      Serial.println("Out of the while loop");
-      Serial.print("Client.available = ");
-      Serial.println(client.available());
-
- 
-      // Read the first line of the request
-      String request = client.readStringUntil('\r');
-      Serial.println(request);
-      client.flush();
- 
-      // Return the response
-      client.println("HTTP/1.1 200 OK");
-      client.println("Content-Type: text/html");
-      client.println(""); //  do not forget this one
-      client.println("<!DOCTYPE HTML>");
-      client.println("<html>");
- 
-      client.println("This is the Wifi Scale webpage");
-      client.println("The scale measurment is curently");
-      client.print(weight);
-      client.print("g");
-
-      client.println("<br><br>");
-      client.println("The food type selected is");
-      client.println(currentFood);
-
-  
-  
-      client.println("<br><br>");
-      client.println("<a href=\"\"\"><button> Refresh Page </button></a>");
-      client.println("</html>");
- 
-      delay(1);
-      Serial.println("Client disonnected");
-      Serial.println("");
-    }
-    Serial.print("Before stop Client.available = ");
-    Serial.println(client.available());
-    client.stop();
-    Serial.print("After stop Client.available = ");
-    Serial.println(client.available());
+    //code to send jSon request
   }
 }
 
