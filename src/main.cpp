@@ -6,6 +6,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFiMulti.h>
 #include <ArduinoJson.h>
+#include <string>
 
 
 //Web server variables
@@ -68,7 +69,7 @@ void connectToWifi(){
   interrupts();
 }
 
-void jsonPOST(){
+void jsonPOST(String weight, String foodtype){
   noInterrupts();
   HTTPClient http;
 
@@ -267,9 +268,11 @@ void loop() {
   //check if need to send json
   if (sendJson == true){
     //code to connect to Wifi
-
-
+    connectToWifi();
     //code to send jSon request
+    char * strWeight;
+    itoa(weight, strWeight, 10);
+    jsonPOST(strWeight, currentFood);
   }
 }
 
