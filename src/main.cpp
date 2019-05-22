@@ -46,7 +46,7 @@ bool sendJson = false;
 WiFiClient client = server.available();
 
 //variables for jsonPost
-const int capacity = JSON_OBJECT_SIZE(3);            
+const int capacity = JSON_OBJECT_SIZE(3) + 70;            
 StaticJsonDocument<capacity> doc;                 //make our json doc which will hold the json to send
 
 void connectToWifi(){
@@ -66,33 +66,44 @@ void connectToWifi(){
   Serial.print("IP address is ");
   Serial.print(WiFi.localIP());
   Serial.println("");
+  Serial.println("WifiSetup before turning interupts back on");
   interrupts();
+  Serial.println("Wifi Setup after turning interupts back on");
 }
 
 void jsonPOST(String weight, String foodtype){
   noInterrupts();
+  Serial.println("In jsonPOST method");
+  Serial.print("Weight is ");
+  Serial.println(weight);
+  Serial.print("Food type is ");
+  Serial.println(foodtype);
   HTTPClient http;
 
   doc["timestamp"].set("09/05/2017 18:00:00");
-  doc["weight"].set("10");
-  doc["foodtype"].set("french");
+  doc["weight"].set(weight);
+  doc["foodtype"].set(foodtype);
 
   String jsonString;
-  serializeJson(doc, jsonString);              //debug to see json
+  serializeJson(doc, jsonString);              //
+  //serializeJson(doc, Serial);
 
   Serial.println(jsonString);
+  
 
   http.begin("http://192.168.0.151:8090/postjson");
+
+  //http.begin("http://127.0.0.1:8090/postjson");
 
   http.addHeader("Content-Type", "application/json");
 
   //serializeJsonPretty(doc, http);
 
   int httpCode = http.POST(jsonString);            //Send the request
-  String payload = http.getString();    //Get the response payload
+  //String payload = http.getString();    //Get the response payload
  
   Serial.println(httpCode);   //Print HTTP return code
-  Serial.println(payload);    //Print request response payload
+  //Serial.println(payload);    //Print request response payload
  
   http.end();  //Close connectio
   interrupts();
@@ -194,7 +205,7 @@ void setup() {
   lcd.print("Connecting to Wifi now");
 
   //Setup Wifi connection
-  Serial.println("Setting up Wifi now");
+  /*Serial.println("Setting up Wifi now");
   WiFi.begin(ssid, password);
   while(WiFi.status() != WL_CONNECTED){
     delay(100);
@@ -207,7 +218,7 @@ void setup() {
   Serial.println("");
   server.begin();
 
-
+  */
   delay(2000);
 }
 
@@ -269,10 +280,13 @@ void loop() {
   if (sendJson == true){
     //code to connect to Wifi
     connectToWifi();
+    Serial.println("Out of connect to wifi");
     //code to send jSon request
-    char * strWeight;
+    char strWeight[20] = {};
+    Serial.println("after initialize char array");
     itoa(weight, strWeight, 10);
     jsonPOST(strWeight, currentFood);
+    sendJson = false;
   }
 }
 
