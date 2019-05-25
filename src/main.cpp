@@ -11,8 +11,8 @@
 
 //Web server variables
 //Wifi login
-const char* ssid = "Stormhold";
-const char* password = "itsonthefridge";
+const char* ssid = "WifiSSID";
+const char* password = "PASWORD";
 //Set Web server port
 WiFiServer server(88); 
 //Store HTTP request
